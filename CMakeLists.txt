@@ -17,4 +17,4 @@ add_executable(ft_ssl
         ft_ssl.c
         commands/md5.c
         commands/sha256.c
-        includes/md5.h print.c)
+        includes/md5.h print.c includes/sha256.h)
