@@ -53,21 +53,21 @@ void print_in_quotes(char *s) {
 	ft_print("\"");
 }
 
-void print_md5(char *type, t_ft_ssl *ft_ssl, enum e_input input, char *src, unsigned char *digest)
+void print_hash(char *type, t_ft_ssl *ft_ssl, enum e_input input, char *src, unsigned char *digest, size_t length)
 {
 	if (ft_ssl->quiet)
 	{
-		ft_print_hex(digest, 16);
+		ft_print_hex(digest, length);
 		ft_print("\n");
 	}
 	else {
 		if (input == STDIN) {
-			ft_print_hex(digest, 16);
+			ft_print_hex(digest, length);
 			ft_print("\n");
 		} else
 		{
 			if (ft_ssl->reverse) {
-				ft_print_hex(digest, 16);
+				ft_print_hex(digest, length);
 				ft_print(" ");
 				if (input == STRING)
 					print_in_quotes(src);
@@ -85,7 +85,7 @@ void print_md5(char *type, t_ft_ssl *ft_ssl, enum e_input input, char *src, unsi
 					print_in_brackets(src);
 				}
 				ft_print(" = ");
-				ft_print_hex(digest, 16);
+				ft_print_hex(digest, length);
 				ft_print("\n");
 			}
 		}

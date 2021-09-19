@@ -10,12 +10,9 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "ft_ssl.h"
 #include "md5.h"
-#include <sys/fcntl.h>
-#include <unistd.h>
 
-const uint32_t g_koefficients[] = {
+const t_u32 g_koefficients[] = {
 	0xd76aa478, 0xe8c7b756, 0x242070db, 0xc1bdceee,
 	0xf57c0faf, 0x4787c62a, 0xa8304613, 0xfd469501,
 	0x698098d8, 0x8b44f7af, 0xffff5bb1, 0x895cd7be,
@@ -50,7 +47,7 @@ t_u32 func_i(t_u32 x, t_u32 y, t_u32 z) {
 	return (y ^ (~z | x));
 }
 
-t_u32 cycle_rotate_left(t_u32 value, t_u32 shift) {
+static t_u32 cycle_rotate_left(t_u32 value, t_u32 shift) {
 	return ((value << shift) | (value >> (32 - shift)));
 }
 
@@ -78,7 +75,7 @@ int stage4(t_u32 *a, t_u32 b, t_u32 c, t_u32 d, t_u32 k, t_u32 s, int i) {
 	return i + 1;
 }
 
-void process_body(t_md5_context *context)
+static void process_body(t_md5_context *context)
 {
 	t_u32 a;
 	t_u32 b;
@@ -124,7 +121,7 @@ void process_body(t_md5_context *context)
 	context->d += d;
 }
 
-void transform(unsigned char *digest, const t_md5_context *context)
+static void transform(unsigned char *digest, const t_md5_context *context)
 {
 	digest[0] = context->a;
 	digest[1] = context->a >> 8;
@@ -185,95 +182,4 @@ void md5_init(t_md5_context *context) {
 	context->d = 0x10325476;
 	context->available = 0;
 	context->length = 0;
-}
-
-void process_buf(char *buf, size_t len, unsigned char *digest) {
-	t_md5_context context;
-
-	md5_init(&context);
-	md5_update(&context, buf, len);
-	md5_final(digest, &context);
-}
-
-int process_fd(t_ft_ssl *ft_ssl, int fd, unsigned char *digest) {
-	t_md5_context context;
-	char buf[64];
-	ssize_t res;
-	ssize_t out;
-
-	if (fd == 0) {
-		if (!ft_ssl->quiet) {
-			ft_print("(");
-			if (!ft_ssl->echo_stdin) {
-				ft_print("stdin");
-			}
-		}
-	}
-	md5_init(&context);
-	while ((res = read(fd, buf, sizeof(buf))) != 0) {
-		if (res < 0) {
-			return (ERROR);
-		}
-		if (fd == 0) {
-			if (ft_ssl->echo_stdin) {
-				out = res;
-				while (out > 0 && buf[out - 1] == '\n') {
-					out--;
-				}
-				write(1, buf, out);
-			}
-		}
-		md5_update(&context, buf, res);
-	}
-	if (fd == 0) {
-		if (!ft_ssl->quiet) {
-			ft_print(")= ");
-		} else {
-			if (ft_ssl->echo_stdin)
-				ft_print("\n");
-		}
-	}
-	md5_final(digest, &context);
-	return (OK);
-}
-
-int process_file(t_ft_ssl *ft_ssl, char *file, unsigned char *digest) {
-	int fd;
-	int res;
-
-	fd = open(file, O_RDONLY);
-	if (fd < 0) {
-		err_no_such_file("md5", file);
-		return (ERROR);
-	}
-	res = process_fd(ft_ssl, fd, digest) == ERROR;
-	if (res == ERROR) {
-		err_no_such_file("md5", file);
-	}
-	close(fd);
-	return (res);
-}
-
-int md5(t_ft_ssl *ft_ssl) {
-	int i;
-	int res;
-	unsigned char digest[16];
-
-	if ((ft_ssl->arg_size < 1 && !ft_ssl->print_string) || ft_ssl->echo_stdin) {
-		process_fd(ft_ssl, 0, digest);
-		print_md5("MD5", ft_ssl, STDIN, "", digest);
-	}
-	if (ft_ssl->print_string) {
-		process_buf(ft_ssl->string, ft_strlen(ft_ssl->string), digest);
-		print_md5("MD5", ft_ssl, STRING, ft_ssl->string, digest);
-	}
-	i = 0;
-	while (i < ft_ssl->arg_size) {
-		res = process_file(ft_ssl, ft_ssl->args[i], digest);
-		if (res == OK) {
-			print_md5("MD5", ft_ssl, FILE, ft_ssl->args[i], digest);
-		}
-		i++;
-	}
-	return (OK);
 }

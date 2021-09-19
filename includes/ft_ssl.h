@@ -54,11 +54,18 @@ typedef struct	s_parse_option {
 	int i;
 }				t_parse_option;
 
-typedef struct	s_arg_function{
+typedef struct	s_arg_function {
 	char arg;
 	int (*parse_function)(t_ft_ssl *, t_parse_option *);
 	char *desc;
 }				t_arg_function;
+
+typedef struct	s_hash_functions {
+	void (*init)(void *);
+	void (*update)(void *, void *, size_t);
+	void (*final)(void *, void *);
+	size_t digest_size;
+}				t_hash_functions;
 
 int ft_strlen(const char *s);
 void ft_print(const char *s);
@@ -69,7 +76,6 @@ void ft_dputchar(int d, char c);
 int ft_strcmp(const char *s1, const char *s2);
 int ft_isspace(char c);
 void ft_memset(void *buf, char c, size_t size);
-void ft_memcpy(void *dst, const void *src, size_t size);
 void ft_print_hex(const unsigned char *buf, size_t length);
 
 void print_usage();
@@ -85,8 +91,9 @@ int	parse_option_q(t_ft_ssl *ft_ssl, t_parse_option *option);
 int	parse_option_r(t_ft_ssl *ft_ssl, t_parse_option *option);
 int	parse_option_s(t_ft_ssl *ft_ssl, t_parse_option *option);
 
-int md5(t_ft_ssl *ft_ssl);
-int sha256(t_ft_ssl *ft_ssl);
+int process_hash_md5(t_ft_ssl *ft_ssl);
+int process_hash_sha256(t_ft_ssl *ft_ssl);
 
-void print_md5(char *type, t_ft_ssl *ft_ssl, enum e_input input, char *src, unsigned char *digest);
+void print_hash(char *type, t_ft_ssl *ft_ssl, enum e_input input, char *src,
+			   unsigned char *digest, size_t length);
 #endif

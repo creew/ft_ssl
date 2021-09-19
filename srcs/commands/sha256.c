@@ -12,8 +12,6 @@
 
 #include "sha256.h"
 
-#include "ft_ssl.h"
-
 const t_u32 g_koef[] = {
 	0x428A2F98, 0x71374491, 0xB5C0FBCF, 0xE9B5DBA5, 0x3956C25B, 0x59F111F1,
 	0x923F82A4, 0xAB1C5ED5, 0xD807AA98, 0x12835B01, 0x243185BE, 0x550C7DC3,
@@ -27,37 +25,89 @@ const t_u32 g_koef[] = {
 	0x5B9CCA4F, 0x682E6FF3, 0x748F82EE, 0x78A5636F, 0x84C87814, 0x8CC70208,
 	0x90BEFFFA, 0xA4506CEB, 0xBEF9A3F7, 0xC67178F2};
 
-void process_body(t_sha256_context *context)
+static t_u32 letobe(t_u32 val)
 {
+	return (val << 24 | (val & 0xFF00) << 8 | (val & 0xFF0000) >> 8 | val >> 24);
 }
 
-void transform(unsigned char *digest, const t_sha256_context *context)
+static t_u32 cycle_rotate_right(t_u32 value, t_u32 shift) {
+	return ((value >> shift) | (value << (32u - shift)));
+}
+
+static void process_body(t_sha256_context *context)
 {
-	t_u32 array[8];
+	int i;
+	t_u32 s0;
+	t_u32 s1;
+	t_u32 w[64];
+	t_u32 a, b, c, d, e, f, g, h;
+	t_u32 e0, ma, t2, e1, ch, t1;
+	i = 0 - 1;
+	while (++i < 16) {
+		w[i] = letobe(context->chunks[i]);
+	}
+	i = 16 - 1;
+	while (++i < 64) {
+		s0 = cycle_rotate_right(w[i - 15], 7) ^
+			 cycle_rotate_right(w[i - 15], 18) ^
+			 (w[i - 15] >> 3);
+		s1 = cycle_rotate_right(w[i - 2], 17) ^
+			 cycle_rotate_right(w[i - 2], 19) ^
+			 (w[i - 2] >> 10);
+		w[i] = w[i - 16] + s0 + w[i - 7] + s1;
+	}
+	a = context->h[0];
+	b = context->h[1];
+	c = context->h[2];
+	d = context->h[3];
+	e = context->h[4];
+	f = context->h[5];
+	g = context->h[6];
+	h = context->h[7];
+	i = 0 - 1;
+	while (++i < 64) {
+		e0 = cycle_rotate_right(a, 2) ^ cycle_rotate_right(a, 13) ^
+			 cycle_rotate_right(a, 22);
+		ma = (a & b) ^ (a & c) ^ (b & c);
+		t2 = e0 + ma;
+		e1 = cycle_rotate_right(e, 6) ^ cycle_rotate_right(e, 11) ^
+			 cycle_rotate_right(e, 25);
+		ch = (e & f) ^ ((~e) & g);
+		t1 = h + e1 + ch + g_koef[i] + w[i];
+		h = g;
+		g = f;
+		f = e;
+		e = d + t1;
+		d = c;
+		c = b;
+		b = a;
+		a = t1 + t2;
+	}
+	context->h[0] += a;
+	context->h[1] += b;
+	context->h[2] += c;
+	context->h[3] += d;
+	context->h[4] += e;
+	context->h[5] += f;
+	context->h[6] += g;
+	context->h[7] += h;
+}
+
+static void transform(unsigned char *digest, const t_sha256_context *context)
+{
 	int i;
 
-	array[0] = context->h0;
-	array[1] = context->h1;
-	array[2] = context->h2;
-	array[3] = context->h3;
-	array[4] = context->h4;
-	array[5] = context->h5;
-	array[6] = context->h6;
-	array[7] = context->h7;
 	i = 0;
-	while (i < (sizeof(array) / sizeof(array[0]))) {
-		digest[i * 4 + 0] = array[i];
-		digest[i * 4 + 1] = array[i] >> 8;
-		digest[i * 4 + 2] = array[i] >> 16;
-		digest[i * 4 + 3] = array[i] >> 24;
+	while (i < (sizeof(context->h) / sizeof(context->h[0]))) {
+		digest[i * 4 + 0] = context->h[i] >> 24;
+		digest[i * 4 + 1] = context->h[i] >> 16;
+		digest[i * 4 + 2] = context->h[i] >> 8;
+		digest[i * 4 + 3] = context->h[i] >> 0;
 		i++;
 	}
 }
 
 void sha256_final(unsigned char *digest, t_sha256_context *context) {
-	t_u32 *chunks;
-
-	chunks = (t_u32 *)context->buf;
 	context->buf[context->available++] = 0x80;
 	if (context->available > 56) {
 		while (context->available < 64) {
@@ -70,8 +120,8 @@ void sha256_final(unsigned char *digest, t_sha256_context *context) {
 		context->buf[context->available++] = 0;
 	}
 	context->length <<= 3;
-	chunks[14] = context->length;
-	chunks[15] = context->length >> 32;
+	context->chunks[14] = letobe(context->length >> 32);
+	context->chunks[15] = letobe(context->length);
 	process_body(context);
 	transform(digest, context);
 }
@@ -93,19 +143,14 @@ void sha256_update(t_sha256_context *context, const char *buf, size_t size)
 
 void sha256_init(t_sha256_context *context)
 {
-	context->h0		   = 0x6A09E667;
-	context->h1		   = 0xBB67AE85;
-	context->h2		   = 0x3C6EF372;
-	context->h3		   = 0xA54FF53A;
-	context->h4		   = 0x510E527F;
-	context->h5		   = 0x9B05688C;
-	context->h6		   = 0x1F83D9AB;
-	context->h7		   = 0x5BE0CD19;
+	context->h[0]		   = 0x6A09E667;
+	context->h[1]		   = 0xBB67AE85;
+	context->h[2]		   = 0x3C6EF372;
+	context->h[3]		   = 0xA54FF53A;
+	context->h[4]		   = 0x510E527F;
+	context->h[5]		   = 0x9B05688C;
+	context->h[6]		   = 0x1F83D9AB;
+	context->h[7]		   = 0x5BE0CD19;
 	context->length	   = 0;
 	context->available = 0;
-}
-
-int sha256(t_ft_ssl *ft_ssl)
-{
-	return (OK);
 }

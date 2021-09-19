@@ -12,19 +12,11 @@
 #ifndef FT_SSL_SHA256_H
 # define FT_SSL_SHA256_H
 
-typedef unsigned int t_u32;
-typedef unsigned long t_u64;
+#include "ssl_types.h"
+#include <stddef.h>
 
 typedef struct	s_sha_context {
-	t_u32 h0;
-	t_u32 h1;
-	t_u32 h2;
-	t_u32 h3;
-	t_u32 h4;
-	t_u32 h5;
-	t_u32 h6;
-	t_u32 h7;
-
+	t_u32 h[8];
 	union {
 		t_u32 chunks[16];
 		unsigned char buf[64];
@@ -32,5 +24,9 @@ typedef struct	s_sha_context {
 	t_u64 length;
 	int available;
 } t_sha256_context;
+
+void sha256_final(unsigned char *digest, t_sha256_context *context);
+void sha256_update(t_sha256_context *context, const char *buf, size_t size);
+void sha256_init(t_sha256_context *context);
 
 #endif

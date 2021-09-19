@@ -75,15 +75,3 @@ void ft_memset(void *buf, char c, size_t size) {
 		size--;
 	}
 }
-
-void ft_memcpy(void *dst, const void *src, size_t size) {
-	unsigned char *d;
-	const unsigned char *s;
-
-	d = (unsigned char *)dst;
-	s = (const unsigned char *)src;
-	while (size) {
-		*d++ = *s++;
-		size--;
-	}
-}
