@@ -13,8 +13,8 @@
 #include "check.h"
 #include "md5.h"
 #include "sha256.h"
-
 #include <sha224.h>
+#include <sha512.h>
 #include <stdlib.h>
 
 START_TEST(test_md5_empty_string)
@@ -70,10 +70,32 @@ START_TEST(test_sha224_empty_string)
 }
 END_TEST
 
+START_TEST(test_sha512_empty_string)
+{
+	t_sha512_context context;
+	unsigned char digest[64];
+	unsigned char expected[] = {
+		   0xcf, 0x83, 0xe1, 0x35, 0x7e, 0xef, 0xb8, 0xbd,
+		   0xf1, 0x54, 0x28, 0x50, 0xd6, 0x6d, 0x80, 0x07,
+		   0xd6, 0x20, 0xe4, 0x05, 0x0b, 0x57, 0x15, 0xdc,
+		   0x83, 0xf4, 0xa9, 0x21, 0xd3, 0x6c, 0xe9, 0xce,
+		   0x47, 0xd0, 0xd1, 0x3c, 0x5d, 0x85, 0xf2, 0xb0,
+		   0xff, 0x83, 0x18, 0xd2, 0x87, 0x7e, 0xec, 0x2f,
+		   0x63, 0xb9, 0x31, 0xbd, 0x47, 0x41, 0x7a, 0x81,
+		   0xa5, 0x38, 0x32, 0x7a, 0xf9, 0x27, 0xda, 0x3e
+	   };
+
+	sha512_init(&context);
+	sha512_update(&context, "", 0);
+	sha512_final(digest, &context);
+	ck_assert_mem_eq(digest, expected, 64);
+}
+END_TEST
+
 Suite * money_suite(void)
 {
 	Suite *s;
-	TCase *md5, *sha256, *sha224;
+	TCase *md5, *sha256, *sha224, *sha512;
 
 	s = suite_create("Hashes");
 
@@ -86,6 +108,9 @@ Suite * money_suite(void)
 	sha224 = tcase_create("sha224");
 	tcase_add_test(sha224, test_sha224_empty_string);
 	suite_add_tcase(s, sha224);
+	sha512 = tcase_create("sha512");
+	tcase_add_test(sha512, test_sha512_empty_string);
+	suite_add_tcase(s, sha512);
 	return s;
 }
 

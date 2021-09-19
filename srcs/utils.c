@@ -42,8 +42,9 @@ void ft_putchar(char c)
 }
 
 void ft_print_upper(const char *s) {
-	while (*s) {
-		ft_putchar(ft_to_upper(*s));
+	char c;
+	while ((c = *s++)) {
+		ft_putchar(ft_to_upper(c));
 	}
 }
 

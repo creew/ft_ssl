@@ -23,7 +23,8 @@ static const t_arg_function g_arg_functions[] = {
 static const t_handler g_ssl_functions[] = {
 	{"md5", process_hash_md5},
 	{"sha256", process_hash_sha256},
-	{"sha224", process_hash_sha224}
+	{"sha224", process_hash_sha224},
+	{"sha512", process_hash_sha512}
 };
 
 char	*parse_joined_option(t_parse_option *option)

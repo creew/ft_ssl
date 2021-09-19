@@ -4,11 +4,13 @@ ALL_C =	ft_ssl.c \
         process_hash_md5.c \
         process_hash_sha256.c \
         process_hash_sha224.c \
+        process_hash_sha512.c \
         usage.c \
         utils.c \
 		commands/md5.c \
         commands/sha256.c \
         commands/sha224.c \
+        commands/sha512.c \
         options/parse_option_p.c \
         options/parse_option_q.c \
         options/parse_option_r.c \
@@ -26,6 +28,7 @@ INCLUDES = includes/ft_ssl.h \
            includes/md5.h \
            includes/sha256.h \
            includes/sha224.h \
+           includes/sha512.h \
            includes/ssl_types.h
 
 FLAGS = -Wall -Wextra -Werror

@@ -88,6 +88,7 @@ int		parse_option_s(t_ft_ssl *ft_ssl, t_parse_option *option);
 int		process_hash_md5(t_ft_ssl *ft_ssl, char *name);
 int		process_hash_sha256(t_ft_ssl *ft_ssl, char *name);
 int		process_hash_sha224(t_ft_ssl *ft_ssl, char *name);
+int		process_hash_sha512(t_ft_ssl *ft_ssl, char *name);
 
 void	print_hash(char *type, t_ft_ssl *ft_ssl, enum e_input input, char *src,
 			unsigned char *digest, size_t length);
