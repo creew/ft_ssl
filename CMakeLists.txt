@@ -33,9 +33,11 @@ set(SOURCES
         srcs/options/parse_option_r.c
         srcs/options/parse_option_s.c
         srcs/commands/md5.c
+        srcs/commands/sha224.c
         srcs/commands/sha256.c
         srcs/process_hash_md5.c
         srcs/process_hash_sha256.c
+        srcs/process_hash_sha224.c
         )
 
 set(HEADERS
@@ -43,6 +45,7 @@ set(HEADERS
         includes/md5.h
         includes/sha256.h
         includes/ssl_types.h
+        includes/sha224.h
         )
 add_executable(ft_ssl
         srcs/ft_ssl.c

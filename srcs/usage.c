@@ -31,7 +31,15 @@ void err_invalid_option(char c) {
 void err_invalid_command(const char *arg) {
 	ft_dprint(2, "ft_ssl: Error: '");
 	ft_dprint(2, arg);
-	ft_dprint(2, "' is an invalid command.\n");
+	ft_dprint(2, "' is an invalid command.\n"
+				 "\n"
+				 "Commands:\n"
+				 "md5\n"
+				 "sha256\n"
+				 "sha224\n"
+				 "\n"
+				 "Flags:\n"
+				 "-p -q -r -s\n");
 }
 
 void err_no_such_file(const char *command, const char *file) {

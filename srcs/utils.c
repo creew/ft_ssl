@@ -29,14 +29,27 @@ int ft_isspace(char c)
 	return (c == ' ' || c == '\n' || c == '\r' || c == '\t' || c == '\f' || c == '\v');
 }
 
-void ft_print(char *s)
-{
-	write(1, s, ft_strlen(s));
+int ft_to_upper(int c) {
+	if (c >= 'a' && c <= 'z') {
+		return (c - 'a' + 'A');
+	}
+	return (c);
 }
 
 void ft_putchar(char c)
 {
 	write(1, &c, 1);
+}
+
+void ft_print_upper(const char *s) {
+	while (*s) {
+		ft_putchar(ft_to_upper(*s));
+	}
+}
+
+void ft_print(char *s)
+{
+	write(1, s, ft_strlen(s));
 }
 
 void ft_dprint(int d, const char *s)

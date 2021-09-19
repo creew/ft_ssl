@@ -19,7 +19,7 @@ int main(int ac, char *av[]) {
 	if (parse_argv(&ft_ssl_handler, ac, av) == ERROR) {
 		return (1);
 	}
-	if (ft_ssl_handler.handler->function(&ft_ssl_handler.ft_ssl) == ERROR) {
+	if (ft_ssl_handler.handler->function(&ft_ssl_handler.ft_ssl, ft_ssl_handler.handler->name) == ERROR) {
 		return (1);
 	}
     return 0;

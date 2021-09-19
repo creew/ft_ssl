@@ -12,7 +12,7 @@
 
 #include "md5.h"
 
-const t_u32 g_koefficients[] = {
+static const t_u32 g_koefficients[] = {
 	0xd76aa478, 0xe8c7b756, 0x242070db, 0xc1bdceee,
 	0xf57c0faf, 0x4787c62a, 0xa8304613, 0xfd469501,
 	0x698098d8, 0x8b44f7af, 0xffff5bb1, 0x895cd7be,
@@ -31,19 +31,19 @@ const t_u32 g_koefficients[] = {
 	0xf7537e82, 0xbd3af235, 0x2ad7d2bb, 0xeb86d391
 };
 
-t_u32 func_f(t_u32 x, t_u32 y, t_u32 z) {
+static t_u32 func_f(t_u32 x, t_u32 y, t_u32 z) {
 	return ((x & y) | (~x & z));
 }
 
-t_u32 func_g(t_u32 x, t_u32 y, t_u32 z) {
+static t_u32 func_g(t_u32 x, t_u32 y, t_u32 z) {
 	return ((x & z) | (~z & y));
 }
 
-t_u32 func_h(t_u32 x, t_u32 y, t_u32 z) {
+static t_u32 func_h(t_u32 x, t_u32 y, t_u32 z) {
 	return (x ^ y ^ z);
 }
 
-t_u32 func_i(t_u32 x, t_u32 y, t_u32 z) {
+static t_u32 func_i(t_u32 x, t_u32 y, t_u32 z) {
 	return (y ^ (~z | x));
 }
 
@@ -52,31 +52,30 @@ static t_u32 cycle_rotate_left(t_u32 value, t_u32 shift) {
 }
 
 /* [abcd k s i] a = b + ((a + F(b,c,d) + X[k] + T[i]) <<< s). */
-int stage1(t_u32 *a, t_u32 b, t_u32 c, t_u32 d, t_u32 k, t_u32 s, int i) {
+static int stage1(t_u32 *a, t_u32 b, t_u32 c, t_u32 d, t_u32 k, t_u32 s, int i) {
 	*a = (b + cycle_rotate_left(*a + func_f(b, c, d) + k + g_koefficients[i], s));
 	return i + 1;
 }
 
 /* [abcd k s i] a = b + ((a + G(b,c,d) + X[k] + T[i]) <<< s). */
-int stage2(t_u32 *a, t_u32 b, t_u32 c, t_u32 d, t_u32 k, t_u32 s, int i) {
+static int stage2(t_u32 *a, t_u32 b, t_u32 c, t_u32 d, t_u32 k, t_u32 s, int i) {
 	*a = (b + cycle_rotate_left(*a + func_g(b, c, d) + k + g_koefficients[i], s));
 	return i + 1;
 }
 
 /* [abcd k s i] a = b + ((a + H(b,c,d) + X[k] + T[i]) <<< s). */
-int stage3(t_u32 *a, t_u32 b, t_u32 c, t_u32 d, t_u32 k, t_u32 s, int i) {
+static int stage3(t_u32 *a, t_u32 b, t_u32 c, t_u32 d, t_u32 k, t_u32 s, int i) {
 	*a = (b + cycle_rotate_left(*a + func_h(b, c, d) + k + g_koefficients[i], s));
 	return i + 1;
 }
 
 /* [abcd k s i] a = b + ((a + I(b,c,d) + X[k] + T[i]) <<< s). */
-int stage4(t_u32 *a, t_u32 b, t_u32 c, t_u32 d, t_u32 k, t_u32 s, int i) {
+static int stage4(t_u32 *a, t_u32 b, t_u32 c, t_u32 d, t_u32 k, t_u32 s, int i) {
 	*a = (b + cycle_rotate_left(*a + func_i(b, c, d) + k + g_koefficients[i], s));
 	return i + 1;
 }
 
-static void process_body(t_md5_context *context)
-{
+static void process_body(t_md5_context *context) {
 	t_u32 a;
 	t_u32 b;
 	t_u32 c;
@@ -121,8 +120,7 @@ static void process_body(t_md5_context *context)
 	context->d += d;
 }
 
-static void transform(unsigned char *digest, const t_md5_context *context)
-{
+static void transform(unsigned char *digest, const t_md5_context *context) {
 	digest[0] = context->a;
 	digest[1] = context->a >> 8;
 	digest[2] = context->a >> 16;

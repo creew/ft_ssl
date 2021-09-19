@@ -14,6 +14,7 @@
 #include "md5.h"
 #include "sha256.h"
 
+#include <sha224.h>
 #include <stdlib.h>
 
 START_TEST(test_md5_empty_string)
@@ -50,18 +51,41 @@ START_TEST(test_sha256_empty_string)
 }
 END_TEST
 
+
+START_TEST(test_sha224_empty_string)
+{
+	t_sha224_context context;
+	unsigned char digest[28];
+	unsigned char expected[] = {
+		   0xd1, 0x4a, 0x02, 0x8c, 0x2a, 0x3a, 0x2b,
+		   0xc9, 0x47, 0x61, 0x02, 0xbb, 0x28, 0x82,
+		   0x34, 0xc4, 0x15, 0xa2, 0xb0, 0x1f, 0x82,
+		   0x8e, 0xa6, 0x2a, 0xc5, 0xb3, 0xe4, 0x2f
+	   };
+
+	sha224_init(&context);
+	sha224_update(&context, "", 0);
+	sha224_final(digest, &context);
+	ck_assert_mem_eq(digest, expected, 28);
+}
+END_TEST
+
 Suite * money_suite(void)
 {
 	Suite *s;
-	TCase *tc_core;
+	TCase *md5, *sha256, *sha224;
 
-	s = suite_create("Processes");
+	s = suite_create("Hashes");
 
-	tc_core = tcase_create("Core");
-
-	tcase_add_test(tc_core, test_md5_empty_string);
-	tcase_add_test(tc_core, test_sha256_empty_string);
-	suite_add_tcase(s, tc_core);
+	md5 = tcase_create("md5");
+	tcase_add_test(md5, test_md5_empty_string);
+	suite_add_tcase(s, md5);
+	sha256 = tcase_create("sha256");
+	tcase_add_test(sha256, test_sha256_empty_string);
+	suite_add_tcase(s, sha256);
+	sha224 = tcase_create("sha224");
+	tcase_add_test(sha224, test_sha224_empty_string);
+	suite_add_tcase(s, sha224);
 	return s;
 }
 

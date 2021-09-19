@@ -23,6 +23,7 @@ static const t_arg_function g_arg_functions[] = {
 static const t_handler g_ssl_functions[] = {
 	{"md5", process_hash_md5},
 	{"sha256", process_hash_sha256},
+	{"sha224", process_hash_sha224}
 };
 
 char	*parse_joined_option(t_parse_option *option)
@@ -32,17 +33,14 @@ char	*parse_joined_option(t_parse_option *option)
 
 	arg = option->arg;
 	arg_symbol = *arg++;
-	if (*arg == 0)
-	{
+	if (*arg == 0) {
 		if (option->i < option->argc)
 			arg = option->argv[option->i++];
 		else {
 		    err_require_arg(arg_symbol);
 		    arg = NULL;
 		}
-	}
-	else
-	{
+	} else {
 		while (ft_isspace(*arg))
 			arg++;
 	}
@@ -55,14 +53,12 @@ static int	parse_options(t_ft_ssl *ft_ssl, t_parse_option *option)
 
 	option->arg++;
 	c = 0;
-	while (c < sizeof(g_arg_functions) / sizeof(g_arg_functions[0]))
-	{
+	while (c < sizeof(g_arg_functions) / sizeof(g_arg_functions[0])) {
 		if (*option->arg == g_arg_functions[c].arg)
 			return (g_arg_functions[c].parse_function(ft_ssl, option));
 		c++;
 	}
-	if (*option->arg != 0)
-	{
+	if (*option->arg != 0) {
 		err_invalid_option(*option->arg);
 		print_usage(2);
 		return (ERROR);
@@ -81,8 +77,7 @@ static int parse_command(t_ft_ssl_handler *ft_ssl_handler, t_parse_option *optio
     }
     arg = option->argv[option->i++];
     c = 0;
-    while (c < (sizeof(g_ssl_functions) / sizeof(g_ssl_functions[0])))
-    {
+    while (c < (sizeof(g_ssl_functions) / sizeof(g_ssl_functions[0]))) {
     	if (ft_strcmp(arg, g_ssl_functions[c].name) == 0)
 		{
     		ft_ssl_handler->handler = &g_ssl_functions[c];

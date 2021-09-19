@@ -1,7 +1,7 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   sha256.cpp                                         :+:      :+:    :+:   */
+/*   sha224.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: eklompus <eklompus@student.21-school.ru>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "sha256.h"
+#include "sha224.h"
 
 static const t_u32 g_koef[] = {
 	0x428A2F98, 0x71374491, 0xB5C0FBCF, 0xE9B5DBA5, 0x3956C25B, 0x59F111F1,
@@ -34,7 +34,7 @@ static t_u32 cycle_rotate_right(t_u32 value, t_u32 shift) {
 	return ((value >> shift) | (value << (32u - shift)));
 }
 
-static void process_body(t_sha256_context *context) {
+static void process_body(t_sha224_context *context) {
 	int i;
 	t_u32 s0;
 	t_u32 s1;
@@ -92,11 +92,11 @@ static void process_body(t_sha256_context *context) {
 	context->h[7] += h;
 }
 
-static void transform(unsigned char *digest, const t_sha256_context *context) {
+static void transform(unsigned char *digest, const t_sha224_context *context) {
 	unsigned long	i;
 
 	i = 0;
-	while (i < (sizeof(context->h) / sizeof(context->h[0]))) {
+	while (i < (sizeof(context->h) / sizeof(context->h[0]) - 1)) {
 		digest[i * 4 + 0] = context->h[i] >> 24;
 		digest[i * 4 + 1] = context->h[i] >> 16;
 		digest[i * 4 + 2] = context->h[i] >> 8;
@@ -105,7 +105,7 @@ static void transform(unsigned char *digest, const t_sha256_context *context) {
 	}
 }
 
-void sha256_final(unsigned char *digest, t_sha256_context *context) {
+void sha224_final(unsigned char *digest, t_sha224_context *context) {
 	context->buf[context->available++] = 0x80;
 	if (context->available > 56) {
 		while (context->available < 64) {
@@ -124,7 +124,7 @@ void sha256_final(unsigned char *digest, t_sha256_context *context) {
 	transform(digest, context);
 }
 
-void sha256_update(t_sha256_context *context, const char *buf, size_t size) {
+void sha224_update(t_sha224_context *context, const char *buf, size_t size) {
 	context->length += size;
 	while (size) {
 		context->buf[context->available++] = *buf++;
@@ -136,15 +136,15 @@ void sha256_update(t_sha256_context *context, const char *buf, size_t size) {
 	}
 }
 
-void sha256_init(t_sha256_context *context) {
-	context->h[0]		   = 0x6A09E667;
-	context->h[1]		   = 0xBB67AE85;
-	context->h[2]		   = 0x3C6EF372;
-	context->h[3]		   = 0xA54FF53A;
-	context->h[4]		   = 0x510E527F;
-	context->h[5]		   = 0x9B05688C;
-	context->h[6]		   = 0x1F83D9AB;
-	context->h[7]		   = 0x5BE0CD19;
+void sha224_init(t_sha224_context *context) {
+	context->h[0]		   = 0xC1059ED8;
+	context->h[1]		   = 0x367CD507;
+	context->h[2]		   = 0x3070DD17;
+	context->h[3]		   = 0xF70E5939;
+	context->h[4]		   = 0xFFC00B31;
+	context->h[5]		   = 0x68581511;
+	context->h[6]		   = 0x64F98FA7;
+	context->h[7]		   = 0xBEFA4FA4;
 	context->length	   = 0;
 	context->available = 0;
 }
